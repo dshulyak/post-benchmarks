@@ -1,0 +1,14 @@
+[package]
+name = "post-benchmarks"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+siphasher = "0.3.10"
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "bench_algos"
+harness = false
