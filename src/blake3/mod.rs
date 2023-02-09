@@ -10,14 +10,13 @@ pub fn work(size: u64) {
 
     let mut hasher = blake3::Hasher::new();
 
-    let mut out = [0u8; 640];
-
     let file = File::open("/dev/zero").expect("Could not open file");
     let mut reader = BufReader::with_capacity(16 * 1024 * 1024, file);
     let mut buffer = [0u8; B];
+    let mut out = [0u8; 680 / 8];
 
-    for _ in 0..(size / 16) {
-        reader.read_exact(&mut buffer[..]).unwrap();
+    for _ in 0..(size / B as u64) {
+        reader.read_exact(&mut buffer).unwrap();
         hasher.reset();
         hasher.update(challenge);
         hasher.update(&buffer);
