@@ -18,7 +18,7 @@ pub fn work_parallel(size: u64) {
     let file = File::open("/dev/zero").expect("Could not open file");
     let mut reader = BufReader::with_capacity(1024 * 1024, file);
 
-    const AES_PARALLELISM: usize = 16;
+    const AES_PARALLELISM: usize = 8;
     let challenge = GenericArray::from_slice(b"hello world, challenge me!!!!!!!");
     let mut labels = [GenericArray::from([0u8; 16]); AES_PARALLELISM];
     let mut blocks = [GenericArray::from([0u8; 16]); AES_PARALLELISM];
@@ -39,9 +39,7 @@ pub fn work_parallel(size: u64) {
             reader.read_exact(label_block).unwrap();
         }
         for cipher in &ciphers {
-            for label_block in &mut labels {
-                cipher.encrypt_block(label_block);
-            }
+            black_box(cipher.encrypt_blocks_b2b(&labels, &mut blocks).unwrap())
         }
     }
 }
