@@ -1,9 +1,18 @@
 use std::fs::File;
 use std::hint::black_box;
 use std::io::{BufReader, Read};
+use std::thread::scope;
 
 use aes::cipher::{generic_array::GenericArray, BlockEncrypt, KeyInit};
 use aes::{Aes128, Aes256};
+
+pub fn work_many(workers: usize, size: u64) {
+    scope(|s| {
+        for _ in 0..workers {
+            s.spawn(|| work_parallel(size/workers as u64));
+        }
+    })
+}
 
 pub fn work_parallel(size: u64) {
     let file = File::open("/dev/zero").expect("Could not open file");
@@ -30,7 +39,9 @@ pub fn work_parallel(size: u64) {
             reader.read_exact(label_block).unwrap();
         }
         for cipher in &ciphers {
-            black_box(cipher.encrypt_blocks_b2b(&labels, &mut blocks).unwrap());
+            for label_block in &mut labels {
+                cipher.encrypt_block(label_block);
+            }
         }
     }
 }
